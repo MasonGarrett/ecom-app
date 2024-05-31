@@ -32,7 +32,7 @@ export const emailRegister = action(
                     verificationToken[0].token
                 );
 
-                return { success: 'Email Confriamtion resent' };
+                return { success: 'Email Confirmation resent' };
             }
             return { error: 'Email already in use' };
         }
