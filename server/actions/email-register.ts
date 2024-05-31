@@ -14,7 +14,7 @@ export const emailRegister = action(
     RegisterSchema,
     async ({ name, email, password }) => {
         // Hashing out passwords
-        const hasedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Check existing user
         const existingUser = await db.query.users.findFirst({
@@ -41,6 +41,7 @@ export const emailRegister = action(
         await db.insert(users).values({
             email,
             name,
+            password: hashedPassword,
         });
 
         const verificationToken = await generateEmailVerificationToken(email);
