@@ -20,6 +20,8 @@ import {
 } from '../ui/form';
 import { Input } from '../ui/input';
 import AuthCard from './auth-card';
+import FormError from './form-error';
+import FormSuccess from './form-success';
 
 const RegisterForm = () => {
     const form = useForm<z.infer<typeof RegisterSchema>>({
@@ -32,16 +34,16 @@ const RegisterForm = () => {
     });
 
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const { execute, status } = useAction(emailRegister, {
         onSuccess(data) {
-            if (data.success) {
-                console.log(data.success);
-            }
+            if (data.error) setError(data.error);
+            if (data.success) setSuccess(data.success);
         },
     });
 
     const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
-        //execute(values);
+        execute(values);
     };
     return (
         <AuthCard
@@ -112,10 +114,15 @@ const RegisterForm = () => {
                                     </FormItem>
                                 )}
                             />
+                            <FormSuccess message={success} />
+                            <FormError message={error} />
+
+                            <Button size={'sm'} variant={'link'} asChild>
+                                <Link href="/auth/reset">
+                                    Forgot your password
+                                </Link>
+                            </Button>
                         </div>
-                        <Button size={'sm'} variant={'link'} asChild>
-                            <Link href="/auth/reset">Forgot your password</Link>
-                        </Button>
                         <Button
                             type="submit"
                             className={cn(
