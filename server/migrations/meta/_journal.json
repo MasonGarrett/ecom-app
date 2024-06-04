@@ -71,6 +71,13 @@
       "when": 1717443986692,
       "tag": "0009_flowery_quentin_quire",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1717529803801,
+      "tag": "0010_sour_mimic",
+      "breakpoints": true
     }
   ]
 }
