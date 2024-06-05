@@ -18,12 +18,15 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { zProductSchema } from '@/types/product-schema';
+import { ProductSchema, zProductSchema } from '@/types/product-schema';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { DollarSign } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import Tiptap from './tiptap';
 
 const ProductForm = () => {
     const form = useForm<zProductSchema>({
+        resolver: zodResolver(ProductSchema),
         defaultValues: {
             title: '',
             description: '',
@@ -67,10 +70,7 @@ const ProductForm = () => {
                                 <FormItem>
                                     <FormLabel>Description</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder="Saekdong Stripe"
-                                            {...field}
-                                        />
+                                        <Tiptap val={field.val} />
                                     </FormControl>
 
                                     <FormMessage />
