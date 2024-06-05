@@ -18,11 +18,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { createProduct } from '@/server/actions/create-product';
+import { getProduct } from '@/server/actions/get-product';
 import { ProductSchema, zProductSchema } from '@/types/product-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DollarSign } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import Tiptap from './tiptap';
@@ -39,6 +41,33 @@ const ProductForm = () => {
     });
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const editMode = searchParams.get('id');
+
+    const checkProduct = async (id: number) => {
+        if (editMode) {
+            const data = await getProduct(id);
+
+            if (data.error) {
+                toast.error(data.error);
+                router.push('/dashboard/products');
+                return;
+            }
+            if (data.success) {
+                const id = parseInt(editMode);
+                form.setValue('title', data.success.title);
+                form.setValue('description', data.success.description);
+                form.setValue('price', data.success.price);
+                form.setValue('id', id);
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (editMode) {
+            checkProduct(parseInt(editMode));
+        }
+    }, []);
 
     const { execute, status } = useAction(createProduct, {
         onSuccess: (data) => {
@@ -51,7 +80,12 @@ const ProductForm = () => {
             }
         },
         onExecute: (data) => {
-            toast.loading('Creating product');
+            if (editMode) {
+                toast.loading('Updating Product');
+            }
+            if (!editMode) {
+                toast.loading('Creating Product');
+            }
         },
     });
 
@@ -62,8 +96,14 @@ const ProductForm = () => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Card Title</CardTitle>
-                <CardDescription>Card Description</CardDescription>
+                <CardTitle>
+                    {editMode ? 'Edit Product' : 'Create Product'}
+                </CardTitle>
+                <CardDescription>
+                    {editMode
+                        ? 'Make changes to existing product'
+                        : 'Add a brand new product'}
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -139,7 +179,7 @@ const ProductForm = () => {
                             className="w-full"
                             type="submit"
                         >
-                            Submit
+                            {editMode ? 'Save Changes' : 'Create Product'}
                         </Button>
                     </form>
                 </Form>
