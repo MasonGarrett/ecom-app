@@ -5,7 +5,6 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
@@ -18,10 +17,14 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { createProduct } from '@/server/actions/create-product';
 import { ProductSchema, zProductSchema } from '@/types/product-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DollarSign } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import Tiptap from './tiptap';
 
 const ProductForm = () => {
@@ -32,7 +35,30 @@ const ProductForm = () => {
             description: '',
             price: 0,
         },
+        mode: 'onChange',
     });
+
+    const router = useRouter();
+
+    const { execute, status } = useAction(createProduct, {
+        onSuccess: (data) => {
+            if (data?.error) {
+                toast.error(data.error);
+            }
+            if (data?.success) {
+                router.push('/dashboard/products');
+                toast.success(data.success);
+            }
+        },
+        onExecute: (data) => {
+            toast.loading('Creating product');
+        },
+    });
+
+    async function onSubmit(values: zProductSchema) {
+        execute(values);
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -42,7 +68,7 @@ const ProductForm = () => {
             <CardContent>
                 <Form {...form}>
                     <form
-                        onSubmit={() => console.log('hey')}
+                        onSubmit={form.handleSubmit(onSubmit)}
                         className="space-y-4"
                     >
                         <FormField
@@ -70,7 +96,7 @@ const ProductForm = () => {
                                 <FormItem>
                                     <FormLabel>Description</FormLabel>
                                     <FormControl>
-                                        <Tiptap val={field.val} />
+                                        <Tiptap val={field.value} />
                                     </FormControl>
 
                                     <FormMessage />
@@ -104,15 +130,20 @@ const ProductForm = () => {
                                 </FormItem>
                             )}
                         />
-                        <Button className="w-full" type="submit">
+                        <Button
+                            disabled={
+                                status === 'executing' ||
+                                !form.formState.isValid ||
+                                !form.formState.isDirty
+                            }
+                            className="w-full"
+                            type="submit"
+                        >
                             Submit
                         </Button>
                     </form>
                 </Form>
             </CardContent>
-            <CardFooter>
-                <p>Card Footer</p>
-            </CardFooter>
         </Card>
     );
 };
