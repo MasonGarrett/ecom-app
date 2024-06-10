@@ -20,10 +20,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { VariantsWithImagesTags } from '@/lib/infer-type';
 import { createVariant } from '@/server/actions/create-variant';
+import { deleteVariant } from '@/server/actions/delete-variant';
 import { VariantSchema } from '@/types/variant-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAction } from 'next-safe-action/hooks';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -54,6 +55,8 @@ export const ProductVariant = ({
         },
     });
 
+    const [open, setOpen] = useState(false);
+
     const setEdit = () => {
         if (!editMode) {
             form.reset();
@@ -64,6 +67,7 @@ export const ProductVariant = ({
             form.setValue('id', variant.id);
             form.setValue('productID', variant.productID);
             form.setValue('productType', variant.productType);
+            form.setValue('color', variant.color);
             form.setValue(
                 'tags',
                 variant.variantTags.map((tag) => tag.tag)
@@ -86,6 +90,7 @@ export const ProductVariant = ({
     const { execute, status } = useAction(createVariant, {
         onExecute() {
             toast.loading('Creating variant', { duration: 500 });
+            setOpen(false);
         },
         onSuccess(data) {
             if (data?.error) {
@@ -96,13 +101,29 @@ export const ProductVariant = ({
             }
         },
     });
+
+    const variantAction = useAction(deleteVariant, {
+        onExecute() {
+            toast.loading('Deleting variant', { duration: 500 });
+            setOpen(false);
+        },
+        onSuccess(data) {
+            if (data?.error) {
+                toast.error(data.error);
+            }
+            if (data?.success) {
+                toast.success(data.success);
+            }
+        },
+    });
+
     function onSubmit(values: z.infer<typeof VariantSchema>) {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
         execute(values);
     }
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger>{children}</DialogTrigger>
             <DialogContent className="lg:max-w-screen-lg overflow-y-scroll max-h-[860px] rounded-md">
                 <DialogHeader>
@@ -167,17 +188,35 @@ export const ProductVariant = ({
                             )}
                         />
                         <VariantImages />
-                        {editMode && variant && (
+                        <div className="flex gap-4 items-center justify-center">
+                            {editMode && variant && (
+                                <Button
+                                    variant={'destructive'}
+                                    type="button"
+                                    disabled={
+                                        variantAction.status === 'executing'
+                                    }
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        variantAction.execute({
+                                            id: variant.id,
+                                        });
+                                    }}
+                                >
+                                    Delete Variant
+                                </Button>
+                            )}
                             <Button
-                                type="button"
-                                onClick={(e) => e.preventDefault()}
+                                disabled={
+                                    status === 'executing' ||
+                                    !form.formState.isValid ||
+                                    !form.formState.isDirty
+                                }
+                                type="submit"
                             >
-                                Delete Variant
+                                {editMode ? 'Update Variant' : 'Create Variant'}
                             </Button>
-                        )}
-                        <Button type="submit">
-                            {editMode ? 'Update Variant' : 'Create Variant'}
-                        </Button>
+                        </div>
                     </form>
                 </Form>
             </DialogContent>

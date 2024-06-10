@@ -43,7 +43,7 @@ const VariantImages = () => {
                 name="tags"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Variant Tags</FormLabel>
+                        <FormLabel> Tags</FormLabel>
                         <FormControl>
                             <UploadDropzone
                                 className="ut-allowed-content:text-secondary-foreground ut-label:text-primary ut-upload-icon:text-primary/50 hover:bg-primary/10 transition-all duration-500 ease-in-out border-seconadry ut-button:bg-primary/75 ut-buton:ut-readying:bg-secondary"
