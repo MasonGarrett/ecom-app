@@ -2,6 +2,7 @@ import { createId } from '@paralleldrive/cuid2';
 import { relations } from 'drizzle-orm';
 import {
     boolean,
+    index,
     integer,
     pgEnum,
     pgTable,
@@ -146,6 +147,7 @@ export const variantTags = pgTable('variantTags', {
 
 export const productRelations = relations(products, ({ many }) => ({
     productVariants: many(productVariants, { relationName: 'productVariants' }),
+    reviews: many(reviews, { relationName: 'reviews' }),
 }));
 
 export const productVariantsRelations = relations(
@@ -175,4 +177,30 @@ export const variantTagsRelations = relations(variantTags, ({ one }) => ({
         references: [productVariants.id],
         relationName: 'variantTags',
     }),
+}));
+
+export const reviews = pgTable(
+    'reviews',
+    {
+        id: serial('id').primaryKey(),
+        rating: real('rating').notNull(),
+        userID: text('userID')
+            .notNull()
+            .references(() => users.id, { onDelete: 'cascade' }),
+        productID: serial('productID')
+            .notNull()
+            .references(() => products.id, { onDelete: 'cascade' }),
+        comment: text('comment').notNull(),
+        created: timestamp('created').defaultNow(),
+    },
+    (table) => {
+        return {
+            productIdx: index('productIdx').on(table.productID),
+            userIdx: index('userIdx').on(table.userID),
+        };
+    }
+);
+
+export const userRelations = relations(users, ({ many }) => ({
+    reviews: many(reviews, { relationName: 'user_reviews' }),
 }));
