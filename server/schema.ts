@@ -201,6 +201,19 @@ export const reviews = pgTable(
     }
 );
 
+export const reviewRelations = relations(reviews, ({ one }) => ({
+    user: one(users, {
+        fields: [reviews.userID],
+        references: [users.id],
+        relationName: 'user_reviews',
+    }),
+    product: one(products, {
+        fields: [reviews.productID],
+        references: [products.id],
+        relationName: 'reviews',
+    }),
+}));
+
 export const userRelations = relations(users, ({ many }) => ({
     reviews: many(reviews, { relationName: 'user_reviews' }),
 }));
