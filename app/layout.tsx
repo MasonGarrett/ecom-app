@@ -28,7 +28,7 @@ export default function RootLayout({
                     defaultTheme="system"
                     enableSystem
                 >
-                    <div className="flex-grow px-6 md:px-12 mx-auto max-w-6sxl">
+                    <div className="flex-grow px-6 md:px-12 mx-auto max-w-8xl">
                         <Nav />
                         <Toaster />
                         {children}

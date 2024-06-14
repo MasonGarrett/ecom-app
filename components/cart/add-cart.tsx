@@ -53,7 +53,7 @@ const AddCart = () => {
                     addToCart({
                         id: productID,
                         variant: { variantID: id, quantity },
-                        name: title + type,
+                        name: title + ' ' + type,
                         price,
                         image,
                     });

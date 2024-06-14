@@ -9,9 +9,12 @@ import {
     DrawerHeader,
     DrawerTrigger,
 } from '../ui/drawer';
+import CartItems from './cart-items';
+import CartMessage from './cart-message';
+import Payment from './payment';
 
 const CartDrawer = () => {
-    const { cart } = useCartStore();
+    const { cart, checkoutProgress } = useCartStore();
     return (
         <Drawer>
             <DrawerTrigger>
@@ -31,10 +34,14 @@ const CartDrawer = () => {
                     <ShoppingBag />
                 </div>
             </DrawerTrigger>
-            <DrawerContent>
-                <DrawerHeader>
-                    <h1>Cart Stuff</h1>
+            <DrawerContent className="min-h-50vh">
+                <DrawerHeader className="">
+                    <CartMessage />
                 </DrawerHeader>
+                <div className="overflow-auto p-4">
+                    {checkoutProgress === 'cart-page' && <CartItems />}
+                    {checkoutProgress === 'payment-page' && <Payment />}
+                </div>
             </DrawerContent>
         </Drawer>
     );
